@@ -7,5 +7,16 @@ B para mi
 N para fa
 M para sol""")
  
-comecar = True
+rodando = True
+
+while rodando:
+    QQ = input("digite uma tecla: ")
+    print (QQ)
+    if QQ[0] == 'E':
+        print("Sair")
+        exit ()
+
+
+
+
 

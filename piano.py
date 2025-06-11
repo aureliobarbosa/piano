@@ -29,6 +29,9 @@ while rodando:
        print ('Frequencia = 349,228 Hz')
     elif QQ [0]=='M':
        print ('Frequencia = 392 Hz')
+    else:
+       print('tente novamente')
+       
 
 
 

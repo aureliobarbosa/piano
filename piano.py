@@ -7,8 +7,8 @@ def tocar_nota(frequencia, duracao=1, sample_rate=44100):
    nota = np.sin(frequencia * t * 2 * np.pi)
    audio = nota * (2**15 - 1) / np.max(np.abs(nota))
    audio = audio.astype(np.int16)
-   sa.play_buffer(audio, 1, 2, sample_rate)
-   
+
+   return sa.play_buffer(audio, 1, 2, sample_rate)
 
 teclas = {
     'Z': 220.0,      # La
@@ -32,24 +32,21 @@ E para Sair
 
 rodando = True
 
-while rodando==True: 
+playback = tocar_nota(440.0, duracao=3)
+
+while rodando:
    tecla= input('Digite uma tecla: ').upper()
 
    if tecla == 'E':
       print('sair')
       rodando=False
    
-   elif tecla in teclas: 
+   elif tecla in teclas:
       frequencia= teclas[tecla]
       print(f'frequencia = {frequencia}Hz')
-      tocar_nota(frequencia)
+      playback = tocar_nota(frequencia)
+      playback.stop()
       rodando=True
    
    else:
        print('Tecla invalida. Tente novamente ')
-
-
-
-
-
-

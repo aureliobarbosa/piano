@@ -1,52 +1,80 @@
 import numpy as np
-import simpleaudio as sa
+import pyaudio
 
 
-def tocar_nota(frequencia, duracao=1, sample_rate=44100):
-   t = np.linspace(0, duracao, int(duracao * sample_rate), False)
-   nota = np.sin(frequencia * t * 2 * np.pi)
-   audio = nota * (2**15 - 1) / np.max(np.abs(nota))
-   audio = audio.astype(np.int16)
+def tocar_nota(frequencia: float, duracao: float = 1.0, sample_rate: int=44100):
+    """
+    Toca uma nota musical com uma dada frequência e duração usando PyAudio.
 
-   return sa.play_buffer(audio, 1, 2, sample_rate)
+    Args:
+        frequencia (float): A frequência da nota em Hertz (Hz).
+        duracao (float): A duração da nota em segundos.
+        sample_rate (int): A taxa de amostragem em samples por segundo (padrão: 44100).
+    """
+    p = pyaudio.PyAudio()
 
-teclas = {
-    'Z': 220.0,      # La
-    'X': 493.88,     # Si
-    'C': 261.63,     # Dó
-    'V': 293.66,     # Ré
-    'B': 329.63,     # Mi
-    'N': 349.23,     # Fá
-    'M': 392.0       # Sol
-}
-print("""Selecione alguma das teclas: 
-Z para La
-X para Si
-C para Dó 
-V para Ré
-B para Mi
-N para Fá
-M para Sol
-E para Sair
-""")
+    sample_number = int(duracao * sample_rate)
+    t = np.linspace(0, duracao, sample_number)
 
-rodando = True
+    # Gera a onda senoidal (a forma básica de uma nota musical)
+    # A amplitude é normalizada para o máximo de um int16 para evitar clipping e garantir volume.
+    amplitude = (2**15 - 1)
+    nota = amplitude * np.sin(frequencia * t * 2 * np.pi)
 
-playback = tocar_nota(440.0, duracao=3)
+    # Converte para 16-bit inteiros (formato necessário para PyAudio)
+    audio_data = nota.astype(np.int16).tobytes()
 
-while rodando:
-   tecla= input('Digite uma tecla: ').upper()
+    # Abre um stream de áudio
+    stream = p.open(format=pyaudio.paInt16,  # Formato de 16-bit inteiros
+                    channels=1,             # Mono
+                    rate=sample_rate,       # Taxa de amostragem
+                    output=True)            # Modo de saída
 
-   if tecla == 'E':
-      print('sair')
-      rodando=False
-   
-   elif tecla in teclas:
-      frequencia= teclas[tecla]
-      print(f'frequencia = {frequencia}Hz')
-      playback = tocar_nota(frequencia)
-      playback.stop()
-      rodando=True
-   
-   else:
-       print('Tecla invalida. Tente novamente ')
+    # Escreve os dados de áudio no stream
+    stream.write(audio_data)
+
+    # Para e fecha o stream
+    stream.stop_stream()
+    stream.close()
+
+    # Termina a instância do PyAudio
+    p.terminate()
+
+
+if __name__ == "__main__":
+    
+    teclas = {
+        'Z': 220.0,      # La
+        'X': 233.08,     # Si
+        'C': 261.63,     # Dó
+        'V': 293.66,     # Ré
+        'B': 329.63,     # Mi
+        'N': 349.23,     # Fá
+        'M': 392.0,      # Sol
+    }
+    print("""Selecione alguma das teclas: 
+    Z para La
+    X para Si
+    C para Dó 
+    V para Ré
+    B para Mi
+    N para Fá
+    M para Sol
+    E para Sair
+    """)
+
+    rodando = True
+
+    while rodando:
+        tecla = input('Digite uma tecla: ').upper()
+
+        if tecla == 'E':
+            print('Saindo do programa...')
+            rodando=False
+        
+        elif tecla in teclas:
+            frequencia = teclas[tecla]
+            print(f'frequencia = {frequencia}Hz')
+            tocar_nota(frequencia)
+        else:
+            print('Tecla invalida. Tente novamente ')
